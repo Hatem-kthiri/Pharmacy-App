@@ -1,0 +1,12 @@
+MONGO_URI="mongodb+srv://pharmacy:pharmacy@pharmacy.8epkcyl.mongodb.net/pharmacy"
+JWT_SECRET_KEY="42ae3LlMwc"
+Node_Mailler_Email = "pharmacymern@gmail.com"
+Node_Mailler_Pass = "hardcode123"
+
+OAUTH_CLIENTID ="28021415701-23dacffbivhr8klb3q6s10ja6cik4t9r.apps.googleusercontent.com"
+OAUTH_CLIENT_SECRET = "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"
+OAUTH_REFRESH_TOKEN ="1//040HzQwRA8IRQCgYIARAAGAQSNgF-L9IrlL8qmyubEFhdN_6hSCnqLbLfFHUnK55PfALn7gNRB4GOiOwbBSZlyUxW7np-P4nOBw"
+
+
+
+ "644nl23m"
