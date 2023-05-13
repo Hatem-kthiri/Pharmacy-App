@@ -23,6 +23,14 @@ const providerMenu = [
     text: "Dashboards",
     link: "/admin",
   },
+  {
+    text: "Products",
+    link: "/provider/products",
+  },
+  {
+    text: "Orders",
+    link: "/provider/orders",
+  },
 ];
 export default {
   adminMenu,

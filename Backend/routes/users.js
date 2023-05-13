@@ -42,7 +42,7 @@ router.post("/add-new-user", async (req, res) => {
     const { name, email, role, location, phone } = req.body;
     // Generate a random password
     const password = Math.random().toString(36).slice(-8);
-
+    console.log(password);
     await User.findOne({ email }).then((user) => {
       if (user) {
         return res.status(400).json({ email: "Email already exists" });

@@ -12,8 +12,9 @@ import Register from "./Other/pages/auth/Register";
 import ForgotPassword from "./Other/pages/auth/ForgotPassword";
 import Success from "./Other/pages/auth/Success";
 
-import { Switch, Route, withRouter } from "react-router-dom";
+import { Switch, Route, withRouter, Redirect } from "react-router-dom";
 import { RedirectAs404 } from "./utils/Utils";
+import PublicRoute from "./route/PublicRoute";
 
 const App = () => {
   return (
@@ -22,7 +23,10 @@ const App = () => {
       <Route exact path={`${process.env.PUBLIC_URL}/auth-success`} component={Success}></Route>
       <Route exact path={`${process.env.PUBLIC_URL}/auth-reset`} component={ForgotPassword}></Route>
       <Route exact path={`${process.env.PUBLIC_URL}/auth-register`} component={Register}></Route>
-      <Route exact path={`${process.env.PUBLIC_URL}/auth-login`} component={Login}></Route>
+      <Route exact path="/">
+        <Redirect to="/auth-login" />
+      </Route>
+      <PublicRoute restricted={true} component={Login} path={`${process.env.PUBLIC_URL}/auth-login`} exact />
 
       {/*Error Pages*/}
       <Route exact path={`${process.env.PUBLIC_URL}/errors/404-classic`} component={Error404Classic}></Route>

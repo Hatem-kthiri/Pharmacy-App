@@ -23,47 +23,23 @@ export const basicData = {
 };
 
 export const transactionData = {
-  header: ["#", "Bill for", "Issue Date", "Due date", "total", "status"],
   data: [
     {
-      id: "4947",
-      bill: "Enterprize Year Subscription",
-      issue: "10-05-2019",
-      due: "10-13-2019",
-      total: "599.00",
-      status: "Due",
-    },
-    {
-      id: "4904",
-      bill: "Maintenance Year Subscription",
-      issue: "06-19-2019",
-      due: "06-26-2019",
-      total: "99.00",
-      status: "Paid",
-    },
-    {
-      id: "4829",
-      bill: "Enterprize Year Subscription",
-      issue: "10-04-2018",
-      due: "10-12-2018",
-      total: "599.00",
-      status: "Paid",
-    },
-    {
-      id: "4830",
-      bill: "Enterprize Anniversary Subscription",
-      issue: "12-04-2018",
-      due: "14-12-2018",
-      total: "399.00",
-      status: "Paid",
-    },
-    {
-      id: "4840",
-      bill: "Enterprize Coverage Subscription",
-      issue: "12-08-2018",
-      due: "13-22-2018",
-      total: "99.00",
-      status: "Cancelled",
+      _id: "123",
+      product: {
+        name: "PainRelief-X",
+      },
+      quantity: 20,
+      price: "500",
+      pharmacy: {
+        _id: "123",
+        name: "name",
+        location: "location",
+        phone: "12345678",
+        email: "example@gmail.com",
+      },
+      deliveryDate: "16-05-2023",
+      status: "Pending",
     },
   ],
 };
