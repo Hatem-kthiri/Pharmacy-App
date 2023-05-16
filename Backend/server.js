@@ -8,6 +8,7 @@ const connectDB = require("./config/DataBase");
 const users = require("./routes/users");
 const orders = require("./routes/orders");
 const provider = require("./routes/provider");
+const pharmacy = require("./routes/pharmacy");
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 connectDB();
@@ -16,7 +17,7 @@ app.use(bodyParser.json());
 // Routes
 app.use("/api/users", users);
 app.use("/api/orders", orders);
-// app.use('/api/pharmacies', pharmacies);
+app.use("/api/pharmacy", pharmacy);
 app.use("/api/provider", provider);
 
 const port = process.env.PORT || 5000;

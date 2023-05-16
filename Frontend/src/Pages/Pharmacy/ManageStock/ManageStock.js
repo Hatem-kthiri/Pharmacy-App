@@ -10,6 +10,7 @@ import {
   ModalBody,
   DropdownItem,
   Form,
+  Row,
 } from "reactstrap";
 import {
   Block,
@@ -32,13 +33,16 @@ import {
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-const UserList = () => {
+const ManageStock = () => {
   const [data, setData] = useState([]);
-
   const [sm, updateSm] = useState(false);
+  const token = localStorage.getItem("accessToken");
+
   const [tablesm, updateTableSm] = useState(false);
   const [onSearch, setonSearch] = useState(true);
   const [onSearchText, setSearchText] = useState("");
+  const [defaultFiles, setDefaultFiles] = useState("");
+
   const [modal, setModal] = useState({
     edit: false,
     add: false,
@@ -46,38 +50,16 @@ const UserList = () => {
   const [editId, setEditedId] = useState();
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    location: "",
-    phone: "",
-    role: "pharmacy",
+    productImage: "",
+    description: "",
+    quantity: 0,
+    price: 0,
+    expiryDate: "31-12-2025",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState(10);
   const [sort, setSortState] = useState("");
 
-  function getRandomColorName() {
-    const colors = [
-      { name: "Red" },
-      { name: "Orange" },
-      { name: "Yellow" },
-      { name: "Green" },
-      { name: "Blue" },
-      { name: "Indigo" },
-      { name: "Violet" },
-      { name: "Gray" },
-      { name: "Brown" },
-      { name: "Pink" },
-      { name: "Purple" },
-      { name: "Cyan" },
-      { name: "Magenta" },
-      { name: "Lime" },
-      { name: "Teal" },
-      { name: "Silver" },
-      { name: "Gold" },
-    ];
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex].name;
-  }
   // onChange to Set Values
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -108,14 +90,11 @@ const UserList = () => {
   useEffect(() => {
     if (onSearchText !== "") {
       const filteredObject = data.filter((item) => {
-        return (
-          item.name.toLowerCase().includes(onSearchText.toLowerCase()) ||
-          item.email.toLowerCase().includes(onSearchText.toLowerCase())
-        );
+        return item.name.toLowerCase().includes(onSearchText.toLowerCase());
       });
       setData([...filteredObject]);
     } else {
-      setData([...data]);
+      getPharmacyProducts();
     }
   }, [onSearchText, setData]);
 
@@ -128,48 +107,55 @@ const UserList = () => {
   const resetForm = () => {
     setFormData({
       name: "",
-      email: "",
-      location: "",
-      phone: "",
-      role: "pharmacy",
+      productImage: "",
+      description: "",
+      quantity: 0,
+      price: 0,
+      expiryDate: "31-12-2025",
     });
   };
 
   // function to close the form modal
   const onFormCancel = () => {
     setModal({ edit: false, add: false });
-    resetForm();
+    reset();
   };
   //function to get Pharmacy user
-  const fetchPharmacyUser = () => {
+  const getPharmacyProducts = () => {
     axios
-      .get("http://localhost:5000/api/users/all-pharmacy")
+      .get("http://localhost:5000/api/pharmacy/get-products", {
+        headers: { authorization: token, "Content-Type": "multipart/form-data" },
+      })
       .then((res) => setData(res.data))
       .catch((err) => console.log(err));
   };
   useEffect(() => {
-    fetchPharmacyUser();
+    getPharmacyProducts();
   }, []);
 
   // submit function to add a new item
   const onFormSubmit = async () => {
-    await axios
-      .post("http://localhost:5000/api/users/add-new-user", formData)
-      .then((response) => {
-        alert(`Email : ${response.data.email},
-               Password :  ${response.data.password}`);
-        fetchPharmacyUser();
-        resetForm();
-        setModal({ edit: false }, { add: false });
-      })
-      .catch((error) => console.log(error));
+    try {
+      // Make a POST request to the backend API
+      await axios.post("http://localhost:5000/api/pharmacy/add-product", formData, {
+        headers: { authorization: token, "Content-Type": "multipart/form-data" },
+      });
+      getPharmacyProducts();
+      reset();
+      setModal({ edit: false, add: false });
+    } catch (error) {
+      console.error(error);
+    }
+    // setView(false);
   };
 
   // submit function to update a new item
   const onEditSubmit = () => {
     axios
-      .put(`http://localhost:5000/api/users/${editId}`, formData)
-      .then((res) => fetchPharmacyUser())
+      .put(`http://localhost:5000/api/pharmacy/edit-product/${editId}`, formData, {
+        headers: { authorization: token, "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => getPharmacyProducts())
       .catch((err) => console.log(err));
     setModal({ edit: false });
     resetForm();
@@ -178,12 +164,23 @@ const UserList = () => {
   // function that loads the want to editted data
   const onEditClick = (id) => {
     data.forEach((item) => {
+      const dateValue = new Date(item.expiryDate);
+      const day = dateValue.getDate();
+      if (month < 10) {
+        var month = `0${dateValue.getMonth() + 1}`;
+      } else {
+        var month = `0${dateValue.getMonth() + 1}`;
+      }
+      const year = dateValue.getFullYear();
+
+      const exDate = `${year}-${month}-${day}`;
       if (item._id === id) {
         setFormData({
           name: item.name,
-          email: item.email,
-          phone: item.phone,
-          location: item.location,
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+          expiryDate: exDate,
         });
         setModal({ edit: true }, { add: false });
         setEditedId(id);
@@ -192,10 +189,12 @@ const UserList = () => {
   };
 
   // function to change to suspend property for an item
-  const suspendUser = (id) => {
+  const deleteProduct = (id) => {
     axios
-      .delete(`http://localhost:5000/api/users/${id}`)
-      .then((res) => fetchPharmacyUser())
+      .delete(`http://localhost:5000/api/pharmacy/delete-product/${id}`, {
+        headers: { authorization: token, "Content-Type": "multipart/form-data" },
+      })
+      .then((res) => getPharmacyProducts())
       .catch((err) => console.log(err));
   };
 
@@ -210,20 +209,20 @@ const UserList = () => {
   // Change Page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const { errors, register, handleSubmit } = useForm();
+  const { errors, register, handleSubmit, reset } = useForm();
 
   return (
     <React.Fragment>
-      <Head title="Pharmacy List"></Head>
+      <Head title="Pharmacy Stock"></Head>
       <Content>
         <BlockHead size="sm">
           <BlockBetween>
             <BlockHeadContent>
               <BlockTitle tag="h3" page>
-                Pharmacy Users Lists
+                Pharmacy Stock
               </BlockTitle>
               <BlockDes className="text-soft">
-                <p>You have total {data.length} users.</p>
+                <p>You have total {data.length} item.</p>
               </BlockDes>
             </BlockHeadContent>
             <BlockHeadContent>
@@ -239,7 +238,7 @@ const UserList = () => {
                     <li className="nk-block-tools-opt">
                       <Button color="primary" className="" onClick={() => setModal({ add: true })}>
                         <Icon name="plus"></Icon>
-                        <span>Add User</span>
+                        <span>Add Item</span>
                       </Button>
                     </li>
                   </ul>
@@ -392,16 +391,19 @@ const UserList = () => {
             <DataTableBody>
               <DataTableHead>
                 <DataTableRow>
-                  <span className="sub-text">Pharmacy User</span>
+                  <span className="sub-text">Item image</span>
                 </DataTableRow>
                 <DataTableRow size="mb">
-                  <span className="sub-text">Email</span>
+                  <span className="sub-text">Name</span>
                 </DataTableRow>
                 <DataTableRow size="md">
-                  <span className="sub-text">Phone</span>
+                  <span className="sub-text">quantity</span>
                 </DataTableRow>
                 <DataTableRow size="lg">
-                  <span className="sub-text">Location</span>
+                  <span className="sub-text">price </span>
+                </DataTableRow>
+                <DataTableRow size="lg">
+                  <span className="sub-text">expiry Date</span>
                 </DataTableRow>
                 <DataTableRow size="lg">
                   <span className="sub-text">Settings</span>
@@ -410,48 +412,43 @@ const UserList = () => {
               {/*Head*/}
               {currentItems.length > 0
                 ? currentItems.map((item) => {
+                    const dateValue = new Date(item.expiryDate);
+                    const day = dateValue.getDate();
+                    if (month < 10) {
+                      var month = `0${dateValue.getMonth() + 1}`;
+                    } else {
+                      var month = `0${dateValue.getMonth() + 1}`;
+                    }
+                    const year = dateValue.getFullYear();
+
+                    const exDate = `${year}-${month}-${day}`;
                     return (
                       <DataTableItem key={item.id}>
                         <DataTableRow>
                           <Link to={`${process.env.PUBLIC_URL}/user-details-regular/${item.id}`}>
                             <div className="user-card">
-                              {/* <div class="user-avatar" style={{ backgroundColor: `${getRandomColorName()}` }}>
-                                <span>{item.name[0].toUpperCase()}</span>
-                              </div> */}
-                              <UserAvatar theme={"primary"} text={item.name[0].toUpperCase()}></UserAvatar>
-                              <div className="user-info">
-                                <span className="tb-lead">
-                                  {item.name}{" "}
-                                  <span
-                                    className={`dot dot-${
-                                      item.status === "Active"
-                                        ? "success"
-                                        : item.status === "Pending"
-                                        ? "warning"
-                                        : "danger"
-                                    } d-md-none ml-1`}
-                                  ></span>
-                                </span>
-                                {/* <span>{item.email}</span> */}
-                              </div>
+                              <img src={item.productImage} alt="product image " className="user-avatar" />
                             </div>
                           </Link>
                         </DataTableRow>
                         <DataTableRow size="mb">
                           <span className="tb-amount">
-                            <Icon className={`text-warning`} name={"mail"}></Icon> <span>{item.email}</span>
+                            <span>{item.name}</span>
                           </span>
                         </DataTableRow>
                         <DataTableRow size="md">
-                          <Icon className={`text-warning`} name={"mobile"}></Icon> <span>{item.phone}</span>
+                          <span>{item.quantity} Item</span>
                         </DataTableRow>
                         <DataTableRow size="lg">
                           <ul className="list-status">
                             <li>
-                              <Icon className={`text-warning`} name={"location"}></Icon> <span>{item.location}</span>
+                              <span>{item.price} TND</span>
                             </li>
                             <li></li>
                           </ul>
+                        </DataTableRow>
+                        <DataTableRow size="md">
+                          <span>{exDate}</span>
                         </DataTableRow>
 
                         <DataTableRow className="nk-tb-col-tools">
@@ -478,7 +475,7 @@ const UserList = () => {
                                     {item.status !== "Suspend" && (
                                       <React.Fragment>
                                         <li className="divider"></li>
-                                        <li onClick={() => suspendUser(item._id)}>
+                                        <li onClick={() => deleteProduct(item._id)}>
                                           <DropdownItem
                                             tag="a"
                                             href="#suspend"
@@ -487,7 +484,7 @@ const UserList = () => {
                                             }}
                                           >
                                             <Icon name="na"></Icon>
-                                            <span>Suspend User</span>
+                                            <span>Delete Product</span>
                                           </DropdownItem>
                                         </li>
                                       </React.Fragment>
@@ -532,117 +529,143 @@ const UserList = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Add User</h5>
+              <h5 className="title">Add Product</h5>
               <div className="mt-4">
                 <Form className="row gy-4" noValidate onSubmit={handleSubmit(onFormSubmit)}>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Name</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="name"
-                        onChange={handleChange}
-                        defaultValue={formData.name}
-                        placeholder="Enter name"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.name && <span className="invalid">{errors.name.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Email </label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="email"
-                        onChange={handleChange}
-                        defaultValue={formData.email}
-                        placeholder="Enter email"
-                        ref={register({
-                          required: "This field is required",
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: "invalid email address",
-                          },
-                        })}
-                      />
-                      {errors.email && <span className="invalid">{errors.email.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Location</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="location"
-                        onChange={handleChange}
-                        defaultValue={formData.location}
-                        placeholder="location"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.location && <span className="invalid">{errors.location.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="phone"
-                        onChange={handleChange}
-                        defaultValue={formData.phone}
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.phone && <span className="invalid">{errors.phone.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  {/* <Col md="12">
-                    <FormGroup>
-                      <label className="form-label">Acount Type</label>
-                      <div className="form-control-wrap">
-                        <RSelect
-                          options={[
-                            { value: "pharmacy", label: "Pharmacy" },
-                            { value: "provider", label: "Provider" },
-                          ]}
-                          defaultValue={{ value: "pharmacy", label: "Pharmacy" }}
-                          onChange={(e) => setFormData({ ...formData, role: e.value })}
-                        />
+                  <Row className="g-3">
+                    <Col size="12">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="product-title">
+                          Product Name
+                        </label>
+                        <div className="form-control-wrap">
+                          <input
+                            type="text"
+                            name="name"
+                            className="form-control"
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Product Name"
+                            ref={register({ required: "This field is required" })}
+                          />
+                          {errors.name && <span className="invalid">{errors.name.message}</span>}
+                        </div>
                       </div>
-                    </FormGroup>
-                  </Col> */}
-                  <Col size="12">
-                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                      <li>
-                        <Button color="primary" size="md" type="submit">
-                          Add User
-                        </Button>
-                      </li>
-                      <li>
-                        <a
-                          href="#cancel"
-                          onClick={(ev) => {
-                            ev.preventDefault();
-                            onFormCancel();
-                          }}
-                          className="link link-light"
-                        >
-                          Cancel
-                        </a>
-                      </li>
-                    </ul>
-                  </Col>
+                    </Col>
+
+                    <Col md="6">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="sale-price">
+                          Price
+                        </label>
+                        <div className="form-control-wrap">
+                          <input
+                            type="number"
+                            name="price"
+                            placeholder="Price"
+                            // dedfaultValue={formData.price}
+                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            ref={register({ required: "This field is required" })}
+                            className="form-control"
+                          />
+                          {errors.price && <span className="invalid">{errors.price.message}</span>}
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md="6">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="stock">
+                          Quantity
+                        </label>
+                        <div className="form-control-wrap">
+                          <input
+                            type="number"
+                            name="quantity"
+                            // defaultValue={formData.quantity}
+                            placeholder="Quantity"
+                            onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                            ref={register({ required: "This field is required" })}
+                            className="form-control"
+                          />
+                          {errors.quantity && <span className="invalid">{errors.quantity.message}</span>}
+                        </div>
+                      </div>
+                    </Col>
+
+                    <Col md="6">
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="stock">
+                          Expiry Date
+                        </label>
+                        <div className="form-control-wrap">
+                          <input
+                            type="date"
+                            name="expiryDate"
+                            placeholder="expiryDate"
+                            onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                            // ref={register({ required: "This field is required" })}
+                            className="form-control"
+                          />
+                          {errors.expiryDate && <span className="invalid">{errors.expiryDate.message}</span>}
+                        </div>
+                      </div>
+                    </Col>
+                    <Col md="6">
+                      <div className="form-group">
+                        <label className="form-label">Product Image</label>
+                        <div className="form-control-wrap">
+                          <div className="custom-file">
+                            <input
+                              type="file"
+                              className="custom-file-input"
+                              id="customFile"
+                              name="productImage"
+                              onChange={(e) => {
+                                setDefaultFiles(e.target.files[0].name);
+                                setFormData({ ...formData, productImage: e.target.files[0] });
+                              }}
+                            />
+                            <label className="custom-file-label" htmlFor="customFile">
+                              {defaultFiles === "" ? "Choose files" : defaultFiles}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </Col>
+                    <Col size="12">
+                      <FormGroup>
+                        <label className="form-label">Description</label>
+                        <textarea
+                          name="description"
+                          placeholder="Your description"
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          className="form-control-xl form-control no-resize"
+                          ref={register({
+                            required: "This field is required",
+                          })}
+                        />
+                        {errors.description && <span className="invalid">{errors.description.message}</span>}
+                      </FormGroup>
+                    </Col>
+
+                    <Col size="12">
+                      <Button color="primary">
+                        <Icon className="plus" name="plus"></Icon>
+                        <span>Add Product</span>
+                      </Button>
+                    </Col>
+                  </Row>
                 </Form>
               </div>
             </div>
           </ModalBody>
         </Modal>
 
-        <Modal isOpen={modal.edit} toggle={() => setModal({ edit: false })} className="modal-dialog-centered" size="lg">
+        <Modal
+          isOpen={modal.edit}
+          toggle={() => setModal({ add: false, edit: false })}
+          className="modal-dialog-centered"
+          size="lg"
+        >
           <ModalBody>
             <a
               href="#cancel"
@@ -655,110 +678,131 @@ const UserList = () => {
               <Icon name="cross-sm"></Icon>
             </a>
             <div className="p-2">
-              <h5 className="title">Update User</h5>
+              <h5 className="title">Update Product</h5>
               <div className="mt-4">
+                {/*  */}
                 <Form className="row gy-4" onSubmit={handleSubmit(onEditSubmit)}>
+                  <Col size="12">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="product-title">
+                        Product Name
+                      </label>
+                      <div className="form-control-wrap">
+                        <input
+                          type="text"
+                          name="name"
+                          defaultValue={formData.name}
+                          className="form-control"
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          placeholder="Product Name"
+                          ref={register({ required: "This field is required" })}
+                        />
+                        {errors.name && <span className="invalid">{errors.name.message}</span>}
+                      </div>
+                    </div>
+                  </Col>
+
                   <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Name</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="name"
-                        defaultValue={formData.name}
-                        onChange={handleChange}
-                        placeholder="Enter name"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.name && <span className="invalid">{errors.name.message}</span>}
-                    </FormGroup>
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="sale-price">
+                        Price
+                      </label>
+
+                      <div className="form-control-wrap">
+                        <input
+                          type="number"
+                          name="price"
+                          defaultValue={formData.price}
+                          placeholder="Price"
+                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                          ref={register({ required: "This field is required" })}
+                          className="form-control"
+                        />
+                        {errors.price && <span className="invalid">{errors.price.message}</span>}
+                      </div>
+                    </div>
                   </Col>
                   <Col md="6">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="stock">
+                        Quantity
+                      </label>
+                      <div className="form-control-wrap">
+                        <input
+                          type="number"
+                          name="quantity"
+                          placeholder="Quantity"
+                          defaultValue={formData.quantity}
+                          onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                          ref={register({ required: "This field is required" })}
+                          className="form-control"
+                        />
+                        {errors.quantity && <span className="invalid">{errors.quantity.message}</span>}
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md="6">
+                    <div className="form-group">
+                      <label className="form-label">Product Image</label>
+                      <div className="form-control-wrap">
+                        <div className="custom-file">
+                          <input
+                            type="file"
+                            className="custom-file-input"
+                            id="customFile"
+                            name="productImage"
+                            onChange={(e) => {
+                              setDefaultFiles(e.target.files[0].name);
+                              setFormData({ ...formData, productImage: e.target.files[0] });
+                            }}
+                          />
+                          <label className="custom-file-label" htmlFor="customFile">
+                            {defaultFiles === "" ? "Choose files" : defaultFiles}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col md="6">
+                    <div className="form-group">
+                      <label className="form-label" htmlFor="stock">
+                        Expiry Date
+                      </label>
+                      <div className="form-control-wrap">
+                        <input
+                          type="date"
+                          name="expiryDate"
+                          placeholder="expiryDate"
+                          defaultValue={formData.expiryDate}
+                          onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                          // ref={register({ required: "This field is required" })}
+                          className="form-control"
+                        />
+                        {errors.expiryDate && <span className="invalid">{errors.expiryDate.message}</span>}
+                      </div>
+                    </div>
+                  </Col>
+                  <Col size="12">
                     <FormGroup>
-                      <label className="form-label">Email</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="email"
-                        defaultValue={formData.email}
-                        onChange={handleChange}
-                        placeholder="Enter email"
+                      <label className="form-label">Description</label>
+                      <textarea
+                        name="description"
+                        defaultValue={formData.description}
+                        placeholder="Your description"
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="form-control-xl form-control no-resize"
                         ref={register({
                           required: "This field is required",
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: "invalid email address",
-                          },
                         })}
                       />
-                      {errors.email && <span className="invalid">{errors.email.message}</span>}
+                      {errors.description && <span className="invalid">{errors.description.message}</span>}
                     </FormGroup>
                   </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">location</label>
-                      <input
-                        className="form-control"
-                        type="text"
-                        name="location"
-                        onChange={handleChange}
-                        defaultValue={formData.location}
-                        placeholder="location"
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.location && <span className="invalid">{errors.location.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  <Col md="6">
-                    <FormGroup>
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        type="number"
-                        name="phone"
-                        onChange={handleChange}
-                        defaultValue={Number(formData.phone)}
-                        ref={register({ required: "This field is required" })}
-                      />
-                      {errors.phone && <span className="invalid">{errors.phone.message}</span>}
-                    </FormGroup>
-                  </Col>
-                  {/* <Col md="12">
-                    <FormGroup>
-                      <label className="form-label">Acount Type</label>
-                      <div className="form-control-wrap">
-                        <RSelect
-                          disabled
-                          options={[
-                            { value: "pharmacy", label: "Pharmacy" },
-                            { value: "provider", label: "Provider" },
-                          ]}
-                          defaultValue={{ value: "pharmacy", label: "Pharmacy" }}
-                          onChange={(e) => setFormData({ ...formData, role: e.value })}
-                        />
-                      </div>
-                    </FormGroup>
-                  </Col> */}
+
                   <Col size="12">
-                    <ul className="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                      <li>
-                        <Button color="primary" size="md" type="submit">
-                          Update User
-                        </Button>
-                      </li>
-                      <li>
-                        <a
-                          href="#cancel"
-                          onClick={(ev) => {
-                            ev.preventDefault();
-                            onFormCancel();
-                          }}
-                          className="link link-light"
-                        >
-                          Cancel
-                        </a>
-                      </li>
-                    </ul>
+                    <Button color="primary">
+                      <span>Update Product</span>
+                    </Button>
                   </Col>
                 </Form>
               </div>
@@ -770,4 +814,4 @@ const UserList = () => {
   );
 };
 
-export default UserList;
+export default ManageStock;

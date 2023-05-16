@@ -1,31 +1,35 @@
 const adminMenu = [
   {
-    text: "Dashboards",
-    link: "/admin",
-  },
-  {
     text: "Pharmacy User",
-    link: "/admin/pharmacy-user",
+    link: "/admin",
   },
   {
     text: "Provider User",
     link: "/admin/provider-user",
   },
+  {
+    text: "Orders",
+    link: "/admin/orders",
+  },
 ];
 const pharmacyMenu = [
   {
-    text: "Dashboards",
+    text: "My Stock",
     link: "/pharmacy",
+  },
+  {
+    text: "Providers",
+    link: "/pharmacy/provider",
+  },
+  {
+    text: "Orders",
+    link: "/pharmacy/my-orders",
   },
 ];
 const providerMenu = [
   {
-    text: "Dashboards",
-    link: "/admin",
-  },
-  {
     text: "Products",
-    link: "/provider/products",
+    link: "/provider",
   },
   {
     text: "Orders",

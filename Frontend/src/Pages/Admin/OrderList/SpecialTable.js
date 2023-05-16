@@ -12,7 +12,6 @@ import {
   Card,
 } from "reactstrap";
 import { Button, Icon, RSelect } from "../../../Other/components/Component";
-import { loginData, orderData, transactionData } from "../../../Other/components/table/TableData";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 export const SpecialTable = ({ action, isCompact }) => {
@@ -25,14 +24,14 @@ export const SpecialTable = ({ action, isCompact }) => {
     deliveryDate: Date.now(),
     delivredStatus: "Pending",
   });
-  const getProviderOrders = async () => {
+  const getOrders = async () => {
     try {
       const token = localStorage.getItem("accessToken");
       const headers = {
         Authorization: token,
       };
 
-      const response = await axios.get("http://localhost:5000/api/orders/get-order-provider", { headers });
+      const response = await axios.get("http://localhost:5000/api/orders/get-orders", { headers });
 
       // Handle the response
       setData(response.data);
@@ -41,7 +40,7 @@ export const SpecialTable = ({ action, isCompact }) => {
     }
   };
   useEffect(() => {
-    getProviderOrders();
+    getOrders();
   }, []);
 
   const [defaultSelect, setDefaultSelect] = useState({ value: "Pending", label: "Pending" });
@@ -80,7 +79,7 @@ export const SpecialTable = ({ action, isCompact }) => {
       await axios.put(`http://localhost:5000/api/orders/update-order/${editId}`, formData, {
         headers: { authorization: token },
       });
-      getProviderOrders();
+      getOrders();
       reset();
       setModalEdit(false);
     } catch (error) {
@@ -102,6 +101,30 @@ export const SpecialTable = ({ action, isCompact }) => {
       }
     });
   };
+  const displayProviderInfo = (id) => {
+    setModalInfo(true);
+    data.map((info) => {
+      if (info.provider._id == id) {
+        setUserInfo({
+          name: info.provider.name,
+          location: info.provider.location,
+          email: info.provider.email,
+          phone: info.provider.phone,
+        });
+      }
+    });
+  };
+  const deleteOrder = async (id) => {
+    const token = localStorage.getItem("accessToken");
+    try {
+      await axios.delete(`http://localhost:5000/api/orders/remove-order/${id}`, {
+        headers: { authorization: token },
+      });
+      getOrders();
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const { errors, register, handleSubmit, reset } = useForm();
 
   const DropdownTrans = ({ orderId }) => {
@@ -112,7 +135,7 @@ export const SpecialTable = ({ action, isCompact }) => {
         </DropdownToggle>
         <DropdownMenu right>
           <ul className="link-list-plain">
-            <li>
+            {/* <li>
               <DropdownItem
                 tag="a"
                 href="#dropdownitem"
@@ -122,13 +145,14 @@ export const SpecialTable = ({ action, isCompact }) => {
               >
                 Edit
               </DropdownItem>
-            </li>
+            </li> */}
             <li>
               <DropdownItem
                 tag="a"
                 href="#dropdownitem"
                 onClick={(ev) => {
                   ev.preventDefault();
+                  deleteOrder(orderId);
                 }}
               >
                 Delete
@@ -163,7 +187,10 @@ export const SpecialTable = ({ action, isCompact }) => {
               <span className="tb-tnx-total">Parmacy Details</span>
             </th>
             <th className="tb-tnx-amount is-alt">
-              <span className="tb-tnx-total">Delivery Date</span>
+              <span className="tb-tnx-total">Provider Details</span>
+            </th>
+            <th className="tb-tnx-amount ">
+              <span className="">Delivery Date</span>
             </th>
             <th className="tb-tnx-amount is-alt">
               <span className=" d-none d-md-inline-block">Status</span>
@@ -224,6 +251,13 @@ export const SpecialTable = ({ action, isCompact }) => {
                   </td>
                   <td className="tb-tnx-amount is-alt">
                     <div className="tb-tnx-total">
+                      <a href="#" onClick={() => displayProviderInfo(item.provider._id)}>
+                        <span className="amount">{item.provider.name}</span>
+                      </a>
+                    </div>
+                  </td>
+                  <td className="tb-tnx-amount is-alt">
+                    <div className=" ">
                       <span className="amount">{exDate}</span>
                     </div>
                   </td>
@@ -253,7 +287,7 @@ export const SpecialTable = ({ action, isCompact }) => {
             })}
         </tbody>
       </table>
-      <Modal isOpen={modalEdit} toggle={() => setModalEdit(false)} className="modal-dialog-centered" size="lg">
+      {/* <Modal isOpen={modalEdit} toggle={() => setModalEdit(false)} className="modal-dialog-centered" size="lg">
         <ModalBody>
           <a
             href="#cancel"
@@ -268,7 +302,7 @@ export const SpecialTable = ({ action, isCompact }) => {
           <div className="p-2">
             <h5 className="title">Update order</h5>
             <div className="mt-4">
-              {/* */}
+               
               <Form className="row gy-4" onSubmit={handleSubmit(onEditSubmit)}>
                 <Col md="12">
                   <div className="form-group">
@@ -323,7 +357,7 @@ export const SpecialTable = ({ action, isCompact }) => {
             </div>
           </div>
         </ModalBody>
-      </Modal>
+      </Modal> */}
       <Modal isOpen={modalInfo} toggle={() => setModalInfo(false)} className="modal-dialog-centered" size="lg">
         <ModalBody>
           <a
@@ -337,7 +371,7 @@ export const SpecialTable = ({ action, isCompact }) => {
             <Icon name="cross-sm"></Icon>
           </a>
           <div className="p-2">
-            <h5 className="title">Pharmacy information</h5>
+            <h5 className="title">Order information</h5>
             <Card className="card-bordered">
               <div className="nk-data data-list">
                 <div className="data-item">

@@ -1,6 +1,6 @@
 import React from "react";
-import Head from "../../../layout/head/Head";
-import Content from "../../../layout/content/Content";
+import Head from "../../../../layout/head/Head";
+import Content from "../../../../layout/content/Content";
 import {
   Block,
   BlockHead,

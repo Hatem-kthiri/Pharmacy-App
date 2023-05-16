@@ -1,14 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserAvatar from "../../../../Other/components/user/UserAvatar";
 import { DropdownToggle, DropdownMenu, Dropdown } from "reactstrap";
 import { Icon } from "../../../../Other/components/Component";
 import { LinkList, LinkItem } from "../../../../Other/components/links/Links";
 import { handleSignout } from "../../../../utils/Utils";
-
+import axios from "axios";
 const User = ({ role, name, email }) => {
   const [open, setOpen] = useState(false);
   const toggle = () => setOpen((prevState) => !prevState);
-
+  const token = localStorage.getItem("accessToken");
+  const [userInfo, setUserInfo] = useState({
+    name: "Loading ...",
+    email: "Loading ...",
+  });
+  const getUserInfo = () => {
+    axios
+      .get("http://localhost:5000/api/users/", { headers: { authorization: token } })
+      .then((res) => {
+        setUserInfo(res.data);
+      })
+      .catch((err) => console.log(err));
+  };
+  useEffect(() => {
+    getUserInfo();
+  }, []);
   return (
     <Dropdown isOpen={open} className="user-dropdown" toggle={toggle}>
       <DropdownToggle
@@ -29,7 +44,7 @@ const User = ({ role, name, email }) => {
             >
               {window.location.pathname.split("/")[2] === "invest" ? "Unverified" : ""}
             </div>
-            <div className="user-name dropdown-indicator">{name}</div>
+            <div className="user-name dropdown-indicator">{userInfo.name}</div>
           </div>
         </div>
       </DropdownToggle>
@@ -37,46 +52,26 @@ const User = ({ role, name, email }) => {
         <div className="dropdown-inner user-card-wrap bg-lighter d-none d-md-block">
           <div className="user-card sm">
             <div className="user-avatar">
-              <span>{name[0].toUpperCase()}</span>
+              <span>{userInfo.name[0].toUpperCase()}</span>
             </div>
             <div className="user-info">
-              <span className="lead-text">{name}</span>
-              <span className="sub-text">{email}</span>
+              <span className="lead-text">{userInfo.name}</span>
+              <span className="sub-text">{userInfo.email}</span>
             </div>
           </div>
         </div>
         <div className="dropdown-inner">
-          <LinkList>
-            <LinkItem
-              link={window.location.pathname.split("/")[2] === "invest" ? "/invest/profile" : "/user-profile-regular"}
-              icon="user-alt"
-              onClick={toggle}
-            >
-              View Profile
-            </LinkItem>
-            <LinkItem
-              link={
-                window.location.pathname.split("/")[2] === "invest"
-                  ? "/invest/profile-setting"
-                  : "/user-profile-setting"
-              }
-              icon="setting-alt"
-              onClick={toggle}
-            >
-              Account Setting
-            </LinkItem>
-            <LinkItem
-              link={
-                window.location.pathname.split("/")[2] === "invest"
-                  ? "/invest/profile-activity"
-                  : "/user-profile-activity"
-              }
-              icon="activity-alt"
-              onClick={toggle}
-            >
-              Login Activity
-            </LinkItem>
-          </LinkList>
+          {role === "admin" ? null : (
+            <LinkList>
+              <LinkItem
+                link={role === "pharmacy" ? "/pharmacy/profile" : role === "provider" ? "/provider/profile" : null}
+                icon="user-alt"
+                onClick={toggle}
+              >
+                View Profile
+              </LinkItem>
+            </LinkList>
+          )}
         </div>
         <div className="dropdown-inner">
           <LinkList>

@@ -57,9 +57,9 @@ const Header = ({ fixed, theme, visibility, toggleSidebar, mobileView, className
               <li className="user-dropdown">
                 <User role={role} name={name} email={email} />
               </li>
-              <li className="notification-dropdown mr-n1">
+              {/* <li className="notification-dropdown mr-n1">
                 <Notification />
-              </li>
+              </li> */}
               {window.location.pathname.split("/")[2] === "invest" && (
                 <li className="hide-mb-sm">
                   <a

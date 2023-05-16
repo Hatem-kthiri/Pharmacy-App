@@ -5,10 +5,15 @@ import { RedirectAs404 } from "../utils/Utils";
 import Invest from "../Other/pages/Invest";
 import UserList from "../Pages/Admin/ManagePharmacy/UserList";
 import ProviderList from "../Pages/Admin/ManageProvider/ProviderList";
+import OrdersList from "../Pages/Admin/OrderList/OrderList";
 import RedirectRoute from "./RedirectRoute";
 import jwt_decode from "jwt-decode";
 import ProductList from "../Pages/Provider/Products/ProductList";
-import Orders from "../Pages/Provider/Orders/Orders";
+import Orders from "../Pages/Provider/Orders/OrdersList";
+import ManageStock from "../Pages/Pharmacy/ManageStock/ManageStock";
+import ProvidersShop from "../Pages/Pharmacy/ProvidersShop/ProvidersShop";
+import MyOrders from "../Pages/Pharmacy/MyOrders/MyOrders";
+import UserProfile from "../Pages/UserProfile/UserProfile";
 
 const Pages = () => {
   useLayoutEffect(() => {
@@ -29,29 +34,57 @@ const Pages = () => {
         />
         <RedirectRoute
           exact
-          path={`${process.env.PUBLIC_URL}/admin/pharmacy-user`}
+          path={`${process.env.PUBLIC_URL}/admin`}
           role="admin"
           userRole={role}
           component={UserList}
         />
-        <RedirectRoute exact path={`${process.env.PUBLIC_URL}/admin`} role="admin" userRole={role} component={Invest} />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/admin/orders`}
+          role="admin"
+          userRole={role}
+          component={OrdersList}
+        />
+        {/* <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/pharmacy`}
+          role="pharmacy"
+          userRole={role}
+          component={Invest} 
+        /> */}
         <RedirectRoute
           exact
           path={`${process.env.PUBLIC_URL}/pharmacy`}
           role="pharmacy"
           userRole={role}
-          component={Invest}
+          component={ManageStock}
         />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/pharmacy/provider`}
+          role="pharmacy"
+          userRole={role}
+          component={ProvidersShop}
+        />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/pharmacy/my-orders`}
+          role="pharmacy"
+          userRole={role}
+          component={MyOrders}
+        />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/pharmacy/provider`}
+          role="pharmacy"
+          userRole={role}
+          component={ProvidersShop}
+        />
+
         <RedirectRoute
           exact
           path={`${process.env.PUBLIC_URL}/provider`}
-          role="provider"
-          userRole={role}
-          component={Invest}
-        />
-        <RedirectRoute
-          exact
-          path={`${process.env.PUBLIC_URL}/provider/products`}
           role="provider"
           userRole={role}
           component={ProductList}
@@ -63,6 +96,21 @@ const Pages = () => {
           userRole={role}
           component={Orders}
         />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/provider/profile`}
+          role="provider"
+          userRole={role}
+          component={UserProfile}
+        />
+        <RedirectRoute
+          exact
+          path={`${process.env.PUBLIC_URL}/pharmacy/profile`}
+          role="pharmacy"
+          userRole={role}
+          component={UserProfile}
+        />
+
         <Route component={RedirectAs404}></Route>
       </Switch>
     </Suspense>

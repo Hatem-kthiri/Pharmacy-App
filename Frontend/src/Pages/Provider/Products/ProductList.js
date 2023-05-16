@@ -236,35 +236,7 @@ const ProductList = () => {
                         />
                       </div>
                     </li>
-                    <li>
-                      <UncontrolledDropdown>
-                        <DropdownToggle
-                          color="transparent"
-                          className="dropdown-toggle dropdown-indicator btn btn-outline-light btn-white"
-                        >
-                          Status
-                        </DropdownToggle>
-                        <DropdownMenu right>
-                          <ul className="link-list-opt no-bdr">
-                            <li>
-                              <DropdownItem tag="a" href="#dropdownitem" onClick={(ev) => ev.preventDefault()}>
-                                <span>New Items</span>
-                              </DropdownItem>
-                            </li>
-                            <li>
-                              <DropdownItem tag="a" href="#dropdownitem" onClick={(ev) => ev.preventDefault()}>
-                                <span>Featured</span>
-                              </DropdownItem>
-                            </li>
-                            <li>
-                              <DropdownItem tag="a" href="#dropdownitem" onClick={(ev) => ev.preventDefault()}>
-                                <span>Out of Stock</span>
-                              </DropdownItem>
-                            </li>
-                          </ul>
-                        </DropdownMenu>
-                      </UncontrolledDropdown>
-                    </li>
+
                     <li className="nk-block-tools-opt">
                       <Button className="toggle btn-icon d-md-none" color="primary" onClick={toggle}>
                         <Icon name="plus"></Icon>
@@ -385,7 +357,6 @@ const ProductList = () => {
                         type="text"
                         name="name"
                         className="form-control"
-                        // defaultValue={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Product Name"
                         ref={register({ required: "This field is required" })}
@@ -442,7 +413,6 @@ const ProductList = () => {
                       <input
                         type="text"
                         name="Manufacturer"
-                        // defaultValue={formData.manufacturer}
                         placeholder="Manufacturer"
                         onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
                         ref={register({ required: "This field is required" })}
@@ -462,7 +432,6 @@ const ProductList = () => {
                         type="date"
                         name="expiryDate"
                         placeholder="expiryDate"
-                        // Value={formData.expiryDate}
                         onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
                         ref={register({ required: "This field is required" })}
                         className="form-control"
@@ -476,7 +445,6 @@ const ProductList = () => {
                     <label className="form-label">Description</label>
                     <textarea
                       name="description"
-                      // defaultValue={formData.description}
                       placeholder="Your description"
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="form-control-xl form-control no-resize"
@@ -487,37 +455,7 @@ const ProductList = () => {
                     {errors.description && <span className="invalid">{errors.description.message}</span>}
                   </FormGroup>
                 </Col>
-                {/* <Col size="12">
-                  <Dropzone onDrop={(acceptedFiles) => handleDropChange(acceptedFiles, setFile)} maxFiles={1}>
-                    {({ getRootProps, getInputProps }) => (
-                      <section>
-                        <div {...getRootProps()} className="dropzone upload-zone dz-clickable">
-                          <input
-                            {...getInputProps()}
-                            onChange={(e) => setFormData({ ...formData, productImage: e.target.files[0] })}
-                          />
-                          {file.length === 0 && (
-                            <div className="dz-message">
-                              <span className="dz-message-text">Drag and drop file</span>
-                              <span className="dz-message-or">or</span>
-                              <Button color="primary">SELECT</Button>
-                            </div>
-                          )}
-                          {file.map((file) => (
-                            <div
-                              key={file.name}
-                              className="dz-preview dz-processing dz-image-preview dz-error dz-complete"
-                            >
-                              <div className="dz-image">
-                                <img src={file.preview} alt="preview" />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
-                  </Dropzone>
-                </Col> */}
+
                 <Col size="12">
                   <div className="form-group">
                     <label className="form-label">Product Image</label>

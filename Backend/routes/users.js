@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/Users");
 const nodemailer = require("nodemailer");
+const authenticateUser = require("../middleware/verifyToken");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post("/register", (req, res) => {
         password: req.body.password,
         name: req.body.name,
         location: req.body.location,
-        phoneNumber: req.body.phoneNumber,
+        phone: req.body.phone,
         role: req.body.role,
       });
 
@@ -41,11 +42,11 @@ router.post("/add-new-user", async (req, res) => {
   try {
     const { name, email, role, location, phone } = req.body;
     // Generate a random password
+    console.log(req.body);
     const password = Math.random().toString(36).slice(-8);
-    console.log(password);
     await User.findOne({ email }).then((user) => {
       if (user) {
-        return res.status(400).json({ email: "Email already exists" });
+        return res.status(400).json({ message: "Email already exists" });
       } else {
         const newUser = new User({
           name,
@@ -56,8 +57,6 @@ router.post("/add-new-user", async (req, res) => {
           phone,
         });
 
-        console.log(newUser.password);
-
         bcrypt.genSalt(10, (err, salt) => {
           bcrypt.hash(newUser.password, salt, (err, hash) => {
             if (err) throw err;
@@ -65,7 +64,9 @@ router.post("/add-new-user", async (req, res) => {
             newUser.save();
           });
         });
-        res.status(200).json(newUser);
+        const user = { email: req.body.email, password: password };
+        console.log(user);
+        res.status(200).json(user);
       }
     });
   } catch (err) {
@@ -137,5 +138,15 @@ router.delete("/:id", (req, res) => {
     .catch((err) =>
       res.status(400).json({ error: "Unable to delete the user" })
     );
+});
+
+// get User Info
+router.get("/", authenticateUser, async (req, res) => {
+  try {
+    const info = await User.findById(req.user.id);
+    res.status(200).json(info);
+  } catch (err) {
+    res.json({ error: "Unable to get Information" });
+  }
 });
 module.exports = router;

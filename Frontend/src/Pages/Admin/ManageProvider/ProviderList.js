@@ -131,11 +131,14 @@ const ProviderList = () => {
   }, []);
 
   // submit function to add a new item
-  const onFormSubmit = () => {
-    axios
+  const onFormSubmit = async () => {
+    await axios
       .post("http://localhost:5000/api/users/add-new-user", formData)
       .then((response) => {
+        alert(`Email : ${response.data.email},
+               Password :  ${response.data.password}`);
         fetchProviderUser();
+
         resetForm();
         setModal({ edit: false }, { add: false });
       })

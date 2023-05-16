@@ -8,7 +8,7 @@ import Error504Modern from "./Other/pages/error/504-modern";
 import Error504Classic from "./Other/pages/error/504-classic";
 
 import Login from "./Pages/Login/Login";
-import Register from "./Other/pages/auth/Register";
+import Register from "./Pages/Register/Register";
 import ForgotPassword from "./Other/pages/auth/ForgotPassword";
 import Success from "./Other/pages/auth/Success";
 
@@ -22,7 +22,7 @@ const App = () => {
       {/* Auth Pages */}
       <Route exact path={`${process.env.PUBLIC_URL}/auth-success`} component={Success}></Route>
       <Route exact path={`${process.env.PUBLIC_URL}/auth-reset`} component={ForgotPassword}></Route>
-      <Route exact path={`${process.env.PUBLIC_URL}/auth-register`} component={Register}></Route>
+      <PublicRoute exact path={`${process.env.PUBLIC_URL}/auth-register`} component={Register}></PublicRoute>
       <Route exact path="/">
         <Redirect to="/auth-login" />
       </Route>
