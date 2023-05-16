@@ -1,6 +1,7 @@
 MONGO_URI="mongodb+srv://pharmacy:pharmacy@pharmacy.8epkcyl.mongodb.net/pharmacy"
 JWT_SECRET_KEY="42ae3LlMwc"
- 
+Email = "pharmacymern@gmail.com"
+Pass = "hardcode123"
 
 admin role 
 admin@pharmacy.com
