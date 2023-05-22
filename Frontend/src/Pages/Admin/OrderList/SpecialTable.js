@@ -127,6 +127,7 @@ export const SpecialTable = ({ action, isCompact }) => {
   };
   const { errors, register, handleSubmit, reset } = useForm();
 
+  const filterData = data.filter((el) => el.product !== null && el.provider !== null && el.pharmacy !== null);
   const DropdownTrans = ({ orderId }) => {
     return (
       <UncontrolledDropdown>
@@ -203,8 +204,8 @@ export const SpecialTable = ({ action, isCompact }) => {
           </tr>
         </thead>
         <tbody>
-          {data &&
-            data.map((item) => {
+          {filterData &&
+            filterData.map((item) => {
               const dateValue = new Date(item.deliveryDate);
               const day = dateValue.getDate();
               if (month < 10) {

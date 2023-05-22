@@ -79,6 +79,8 @@ const Orders = () => {
   };
 
   const { errors, register, handleSubmit, reset } = useForm();
+  const filterData = data.filter((el) => el.product !== null && el.provider !== null && el.pharmacy !== null);
+
   const DropdownTrans = ({ itemId }) => {
     return (
       <UncontrolledDropdown>
@@ -162,8 +164,8 @@ const Orders = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data &&
-                    data.map((item) => {
+                  {filterData &&
+                    filterData.map((item) => {
                       const dateValue = new Date(item.deliveryDate);
                       const day = dateValue.getDate();
                       if (month < 10) {

@@ -166,8 +166,8 @@ const ManageStock = () => {
     data.forEach((item) => {
       const dateValue = new Date(item.expiryDate);
       const day = dateValue.getDate();
-      if (month < 10) {
-        var month = `0${dateValue.getMonth() + 1}`;
+      if (month > 10) {
+        var month = `${dateValue.getMonth() + 1}`;
       } else {
         var month = `0${dateValue.getMonth() + 1}`;
       }

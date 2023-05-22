@@ -103,6 +103,7 @@ export const SpecialTable = ({ action, isCompact }) => {
     });
   };
   const { errors, register, handleSubmit, reset } = useForm();
+  const filterData = data.filter((el) => el.product !== null && el.provider !== null && el.pharmacy !== null);
 
   const DropdownTrans = ({ orderId }) => {
     return (
@@ -176,8 +177,8 @@ export const SpecialTable = ({ action, isCompact }) => {
           </tr>
         </thead>
         <tbody>
-          {data &&
-            data.map((item) => {
+          {filterData &&
+            filterData.map((item) => {
               const dateValue = new Date(item.deliveryDate);
               const day = dateValue.getDate();
               if (month < 10) {
@@ -190,16 +191,6 @@ export const SpecialTable = ({ action, isCompact }) => {
               const exDate = `${year}-${month}-${day}`;
               return (
                 <tr key={item.id} className="tb-tnx-item">
-                  {/* <td className="tb-tnx-id">
-                    <a
-                      href="#id"
-                      onClick={(ev) => {
-                        ev.preventDefault();
-                      }}
-                    >
-                      <span>{item.id}</span>
-                    </a>
-                  </td> */}
                   <td className="tb-tnx-info">
                     <div className="tb-tnx-desc" style={{ overflow: "visible" }}>
                       <span className="title">{item.product.name}</span>

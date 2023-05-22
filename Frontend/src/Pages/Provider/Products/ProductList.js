@@ -133,6 +133,16 @@ const ProductList = () => {
   };
   const onEditClick = async (id) => {
     data.forEach((item) => {
+      const dateValue = new Date(item.expiryDate);
+      const day = dateValue.getDate();
+      if (dateValue.getMonth() + 1 > 10) {
+        var month = `${dateValue.getMonth() + 1}`;
+      } else {
+        var month = `0${dateValue.getMonth() + 1}`;
+      }
+      const year = dateValue.getFullYear();
+
+      const exDate = `${year}-${month}-${day}`;
       if (item._id === id) {
         setFormData({
           name: item.name,
@@ -141,20 +151,26 @@ const ProductList = () => {
           quantity: item.quantity,
           price: item.price,
           manufacturer: item.manufacturer,
-          expiryDate: item.expiryDate,
+          expiryDate: exDate,
         });
         setEditView(true);
         setEditID(id);
       }
     });
   };
-  const onEditSubmit = async () => {
+  const onEditSubmit = async (e) => {
+    e.preventDefault();
     const token = localStorage.getItem("accessToken");
+    console.log("clicked");
     try {
       // Make a POST request to the backend API
-      await axios.put(`http://localhost:5000/api/provider/edit-product/${editID}`, formData, {
-        headers: { authorization: token, "Content-Type": "multipart/form-data" },
-      });
+      await axios
+        .put(`http://localhost:5000/api/provider/edit-product/${editID}`, formData, {
+          headers: { authorization: token, "Content-Type": "multipart/form-data" },
+        })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+
       getProviderProducts();
       setEditView(false);
     } catch (error) {
@@ -504,8 +520,8 @@ const ProductList = () => {
             <div className="p-2">
               <h5 className="title">Update Item</h5>
               <div className="mt-4">
-                {/*  */}
-                <Form className="row gy-4" onSubmit={handleSubmit(onEditSubmit)}>
+                {/* onSubmit={handleSubmit(onEditSubmit)} */}
+                <Form className="row gy-4">
                   <Col size="12">
                     <div className="form-group">
                       <label className="form-label" htmlFor="product-title">
@@ -598,7 +614,7 @@ const ProductList = () => {
                           // ref={register({ required: "This field is required" })}
                           className="form-control"
                         />
-                        {errors.expiryDate && <span className="invalid">{errors.expiryDate.message}</span>}
+                        {/* {errors.expiryDate && <span className="invalid">{errors.expiryDate.message}</span>} */}
                       </div>
                     </div>
                   </Col>
@@ -672,7 +688,7 @@ const ProductList = () => {
                     </div>
                   </Col>
                   <Col size="12">
-                    <Button color="primary">
+                    <Button color="primary" onClick={(e) => onEditSubmit(e)}>
                       <span>Update Product</span>
                     </Button>
                   </Col>
